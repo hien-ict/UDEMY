@@ -26,11 +26,20 @@ var GameState = {
         ]
         this.animals = this.game.add.group();
         
-        var self = this;
+        var self = this, animal;
         animalData.forEach(function(element){
-            self.animals.create(200, self.game.world.centerY,element.key);
+            animal = self.animals.create(-1000, self.game.world.centerY,element.key);
+            
+            animal.customParams = {text: element.text};
+            animal.anchor.setTo(0.5);
+            animal.inputEnabled = true;
+            animal.input.pixelPerfectClick = true;
+            animal.events.onInputDown.add(self.animateAnimal, self)
         });
-
+        
+        this.currentAnimal = this.animals.next();
+        this.currentAnimal.position.set(this.game.world.centerX,this.game.world.centerY);
+        
         //left arrow
         this.leftArrow = this.game.add.sprite(60, this.game.world.centerY, 'arrow');
         this.leftArrow.anchor.setTo(0.5);
@@ -58,6 +67,26 @@ var GameState = {
     },
     switchAnimal: function (sprite, event) {
         console.log('Move animal');
+        
+        var newAnimal, endX;
+        
+        //1. get the direction of arrow
+        if (sprite.customParams.direction > 0){
+            newAnimal = this.animals.next();//2. get then next animal
+            endX = 640 + this.currentAnimal.width/2;//3. get the final destination of current animal
+        }
+        else{
+            newAnimal = this.animals.previous();
+            endX = -this.currentAnimal.width/2;
+        }
+        this.currentAnimal.x= endX;//4. move current animal to final destination
+        newAnimal.x = this.game.world.centerX;
+        this.currentAnimal = newAnimal;//5. set the next animal as the new current animal
+        
+        
+    },
+    animateAnimal: function(sprite, event){
+        console.log('Animal ...');
     }
 
 };
